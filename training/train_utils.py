@@ -4,7 +4,6 @@ import torch
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 from loss.global_loss import *
 from loss.local_consistency_loss import *
-from loss.attention_loss import *
 
 def get_loss_function(cfg):
     if cfg.train_loss_function == 'triplet':
@@ -22,11 +21,7 @@ def get_point_loss_function(cfg):
         point_loss_function = point_infonce_loss
     else:
         raise NotImplementedError(cfg.point_loss_function)
-    return point_loss_function  
-
-def get_attention_loss_function(cfg):
-    attention_loss_function = attention_loss
-    return attention_loss_function
+    return point_loss_function   
 
 def get_optimizer(cfg, model_parameters):
     if cfg.optimizer == 'sgd':
