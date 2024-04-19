@@ -43,6 +43,7 @@ trainer_arg.add_argument('--point_pos_margin', type=float, default=0.1)  # 0.1
 trainer_arg.add_argument('--point_neg_weight', type=float, default=1.0)
 trainer_arg.add_argument('--point_loss_weight', type=float, default=1.0)  # 0.1
 trainer_arg.add_argument('--scene_loss_weight', type=float, default=1.0)  # 0.1
+trainer_arg.add_argument('--attention_loss_weight', type=float, default=1.0)  # 0.1
 
 # Optimizer arguments
 opt_arg = add_argument_group('Optimizer')
