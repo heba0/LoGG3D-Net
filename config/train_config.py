@@ -58,7 +58,7 @@ opt_arg.add_argument('--scheduler', type=str,
 data_arg = add_argument_group('Data')
 # KittiPointSparseTupleDataset #MulRanPointSparseTupleDataset
 data_arg.add_argument('--dataset', type=str,
-                      default='KittiPointSparseTupleDataset')
+                      default='GeneralPointSparseTupleDataset')
 data_arg.add_argument('--collation_type', type=str,
                       default='default')  # default#sparcify_list
 data_arg.add_argument('--num_points', type=int, default=35000)
@@ -103,13 +103,17 @@ data_arg.add_argument('--mulran_data_split', type=dict, default={
     'test': ['KAIST/KAIST_01']
 })
 
+data_arg.add_argument('--wildplaces_dir', type=str,
+                      default='data/', help="Path to the wild-Places dataset")
+
+
 # Data loader configs
 data_arg.add_argument('--train_phase', type=str, default="train")
 data_arg.add_argument('--train_pickles', type=dict, default={
-    'new_dataset': "/path/to/new_dataset/training_both_5_50.pickle",
+    'wildplaces': "/data/training_wild-places.pickle",
 })
 data_arg.add_argument('--gp_vals', type=dict, default={
-    'apollo': 1.6, 'kitti':1.5, 'mulran':0.9
+    'apollo': 1.6, 'kitti':1.5, 'mulran':0.9, 'wildplaces':0.9
 })
 data_arg.add_argument('--val_phase', type=str, default="val")
 data_arg.add_argument('--test_phase', type=str, default="test")

@@ -37,7 +37,7 @@ class GeneralSparseTupleDataset(GeneralTupleDataset):
 
     def get_pointcloud_sparse_tensor(self,  base_dir, rel_path, dataset, get_pcd=False):
         fname = os.path.join(base_dir, rel_path)
-        if dataset == 'ugv' or dataset == 'apollo' or dataset == 'bushwalk':
+        if dataset == 'ugv' or dataset == 'apollo' or dataset == 'bushwalk' or dataset == 'wildplaces'::
             pcd = o3d.io.read_point_cloud(fname) # TODO: add numpy load, conditional
             
         if dataset == 'mulran' or dataset == 'kitti':

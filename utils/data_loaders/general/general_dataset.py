@@ -56,11 +56,13 @@ class GeneralDatasetEval(PointCloudDataset):
                  config=None):
 
         # self.root = root = config.general_dir
-        self.base_dirs = {"kitti" : config.kitti_dir,
-                            "mulran": config.mulran_dir,
-                            "ugv" : config.ugv_dir,
-                            "apollo" : config.apollo_dir,
-                            "bushwalk" : config.bushwalk_dir}
+        # self.base_dirs = {"kitti" : config.kitti_dir,
+        #                     "mulran": config.mulran_dir,
+        #                     "ugv" : config.ugv_dir,
+        #                     "apollo" : config.apollo_dir,
+        #                     "bushwalk" : config.bushwalk_dir}
+        
+        self.base_dirs = {"wildplaces" : config.wildplaces_dir}
 
         self.eval_pickle = config.eval_pickle
 
@@ -179,11 +181,12 @@ class GeneralTupleDataset(GeneralDataset):
                  random_occlusion=False,
                  random_scale=False,
                  config=None):
-        self.base_dirs = {"kitti" : config.kitti_dir,
-                            "mulran": config.mulran_dir,
-                            "ugv" : config.ugv_dir,
-                            "apollo" : config.apollo_dir,
-                            "bushwalk" : config.bushwalk_dir}
+        # self.base_dirs = {"kitti" : config.kitti_dir,
+        #                     "mulran": config.mulran_dir,
+        #                     "ugv" : config.ugv_dir,
+        #                     "apollo" : config.apollo_dir,
+        #                     "bushwalk" : config.bushwalk_dir}
+        self.base_dirs = {"wildplaces" : config.wildplaces_dir}
 
         self.train_pickles = config.train_pickles
         self.positives_per_query = config.positives_per_query

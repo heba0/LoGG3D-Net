@@ -8,7 +8,8 @@ from torchpack import distributed as dist
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 from utils.misc_utils import log_config
 from evaluation.evaluate import *
-from utils.data_loaders.make_dataloader import *
+# from utils.data_loaders.make_dataloader import *
+from utils.data_loaders.make_dataloader_general import *
 from config.train_config import get_config
 from models.pipeline_factory import get_pipeline
 from training import train_utils
