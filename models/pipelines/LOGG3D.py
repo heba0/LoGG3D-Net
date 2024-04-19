@@ -18,12 +18,18 @@ class LOGG3D(nn.Module):
         self.spvcnn = spvcnn(output_dim=feature_dim)
         self.sop = SOP(
             signed_sqrt=False, do_fc=False, input_dim=feature_dim, is_tuple=False)
+        self.mlp = nn.Sequential(nn.Linear(feature_dim, feature_dim), nn.Softmax(dim=1)) # input (B, N, feature_dim) -> output (B, N, feature_dim)
 
     def forward(self, x):
         _, counts = torch.unique(x.C[:, -1], return_counts=True)
 
         x = self.spvcnn(x)
         y = torch.split(x, list(counts))
+        
+        # weight local features here to affect Global Descriptor
+        weights = self.mlp(y) # N x feature_dim
+        y *= weights 
+        
         x = torch.nn.utils.rnn.pad_sequence(list(y)).permute(1, 0, 2)
         x = self.sop(x)
         return x, y[:2]

@@ -52,6 +52,7 @@ def main():
     # parameters = filter(lambda p: p.requires_grad, model.parameters())
     loss_function = train_utils.get_loss_function(cfg)
     point_loss_function = train_utils.get_point_loss_function(cfg)
+    attention_loss_function = train_utils.get_attention_loss_function(cfg)
     optimizer = train_utils.get_optimizer(cfg, model.parameters())
     scheduler = train_utils.get_scheduler(cfg, optimizer)
 
@@ -105,6 +106,11 @@ def main():
                     loss = cfg.scene_loss_weight * scene_loss + cfg.point_loss_weight * point_loss
                 else:
                     loss = scene_loss
+                
+                if cfg.attention_loss_weight > 0:
+                    attention_loss = attention_loss_function(output[1])
+                    running_point_loss += attention_loss.item()
+                    loss += cfg.attention_loss_weight * attention_loss
 
             elif cfg.train_pipeline == 'PointNetVLAD':
                 batch_t = batch.to('cuda:%d' % dist.local_rank())
