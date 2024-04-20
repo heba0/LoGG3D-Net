@@ -24,7 +24,7 @@ def attention_loss(weighted_local_desc, org_local_desc):
         softmax((X @ X.T) / d_k) * X
 
     """
-    # TODO: when and where to normalize the matrix? normalize the local descriptor?
+    # TODO: when and where to layer normalize the matrix? normalize the local descriptor?
 
     softmax = nn.Softmax(dim=-1)
     d_k = math.sqrt(org_local_desc.shape[-1])
@@ -36,6 +36,8 @@ def attention_loss(weighted_local_desc, org_local_desc):
     score = softmax(score)
 
     self_attention_desc = torch.bmm(score, org_local_desc) # batch, N, d 
+    
+    # layer norm?
 
     # calculatet the loss on the feature dimension
     loss = (weighted_local_desc - self_attention_desc).pow(2).sum(-1)

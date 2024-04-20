@@ -18,7 +18,7 @@ class LOGG3D(nn.Module):
         self.spvcnn = spvcnn(output_dim=feature_dim)
         self.sop = SOP(
             signed_sqrt=False, do_fc=False, input_dim=feature_dim, is_tuple=False)
-        self.mlp = nn.Sequential(nn.Linear(feature_dim, feature_dim), nn.Softmax(dim=1)) # input (B, N, feature_dim) -> output (B, N, feature_dim)
+        self.mlp = nn.Sequential(nn.Linear(feature_dim, feature_dim), nn.Softmax(dim=-1)) # input (B, N, feature_dim) -> output (B, N, feature_dim)
 
     def forward(self, x):
         _, counts = torch.unique(x.C[:, -1], return_counts=True)
@@ -27,12 +27,12 @@ class LOGG3D(nn.Module):
         y = torch.split(x, list(counts))
         
         # weight local features here to affect Global Descriptor
-        weights = self.mlp(y) # N x feature_dim
+        weights = self.mlp(y) # B, N, feature_dim
         weighted_y = weights * y
         
         x = torch.nn.utils.rnn.pad_sequence(list(weighted_y)).permute(1, 0, 2)
         x = self.sop(x)
-        return x, weighted_y[:2], y[:2] # slice to 2 is to keep only anchor and positive pair, ignore negative sample
+        return x, weighted_y[:2], y[:2] # slice to 2 is to keep only anchor and positive pair, ignore negative sample and others
 
 
 if __name__ == '__main__':
