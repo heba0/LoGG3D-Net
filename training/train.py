@@ -109,7 +109,7 @@ def main():
                     loss = scene_loss
                 
                 if cfg.attention_loss_weight > 0:
-                    attention_loss = attention_loss_function(output[1])
+                    attention_loss = attention_loss_function(output[1], output[2])
                     running_point_loss += attention_loss.item()
                     loss += cfg.attention_loss_weight * attention_loss
 

@@ -28,11 +28,11 @@ class LOGG3D(nn.Module):
         
         # weight local features here to affect Global Descriptor
         weights = self.mlp(y) # N x feature_dim
-        y *= weights 
+        weighted_y = weights * y
         
-        x = torch.nn.utils.rnn.pad_sequence(list(y)).permute(1, 0, 2)
+        x = torch.nn.utils.rnn.pad_sequence(list(weighted_y)).permute(1, 0, 2)
         x = self.sop(x)
-        return x, y[:2]
+        return x, weighted_y[:2], y[:2] # slice to 2 is to keep only anchor and positive pair, ignore negative sample
 
 
 if __name__ == '__main__':

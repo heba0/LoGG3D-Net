@@ -15,19 +15,21 @@ def similarity_downgrade(similarity):
     """
     return np.exp(-similarity)
 
-def attention_loss(org_local_desc, weighted_local_desc):
+def attention_loss(weighted_local_desc, org_local_desc):
     """
-    org_local_desc: the output from spvcnn in LOGG3D Net; dim: batch, N, d
+    org_local_desc: the output from spvcnn in LOGG3D Net as local descriptor; dim: batch, N, d
     weight_local_desc: the weighted org_local_desc; dim: batch, N, d
 
     following self-attention scheme:
         softmax((X @ X.T) / d_k) * X
 
     """
-    # normalize the local_descritpr?
+    # TODO: when and where to normalize the matrix? normalize the local descriptor?
 
     softmax = nn.Softmax(dim=-1)
     d_k = math.sqrt(org_local_desc.shape[-1])
+    
+    # (X @ X.T) / d_k
     self_similarity = torch.bmm(org_local_desc, org_local_desc.permute(0, 2, 1)) / d_k # batch, N, N
     
     score = similarity_downgrade(self_similarity) 
@@ -35,6 +37,7 @@ def attention_loss(org_local_desc, weighted_local_desc):
 
     self_attention_desc = torch.bmm(score, org_local_desc) # batch, N, d 
 
+    # calculatet the loss on the feature dimension
     loss = (weighted_local_desc - self_attention_desc).pow(2).sum(-1)
 
     return loss.mean()

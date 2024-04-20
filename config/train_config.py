@@ -58,7 +58,7 @@ opt_arg.add_argument('--scheduler', type=str,
 data_arg = add_argument_group('Data')
 # KittiPointSparseTupleDataset #MulRanPointSparseTupleDataset
 data_arg.add_argument('--dataset', type=str,
-                      default='GeneralPointSparseTupleDataset')
+                      default='KittiPointSparseTupleDataset')
 data_arg.add_argument('--collation_type', type=str,
                       default='default')  # default#sparcify_list
 data_arg.add_argument('--num_points', type=int, default=35000)
