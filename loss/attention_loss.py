@@ -11,9 +11,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 def similarity_downgrade(similarity):
     """
     for a input self-similarity matrix, higher similarity returns lower scores
-    y = exp(-x)
+    similarity range: 0 ~ 1 after softmax
+    y = -log(x)
     """
-    return np.exp(-similarity)
+    return -torch.log(similarity)
 
 def attention_loss(weighted_local_desc, org_local_desc):
     """
@@ -32,8 +33,8 @@ def attention_loss(weighted_local_desc, org_local_desc):
     # (X @ X.T) / d_k
     self_similarity = torch.bmm(org_local_desc, org_local_desc.permute(0, 2, 1)) / d_k # batch, N, N
     
-    score = similarity_downgrade(self_similarity) 
-    score = softmax(score)
+    score = softmax(self_similarity)
+    score = similarity_downgrade(score) 
 
     self_attention_desc = torch.bmm(score, org_local_desc) # batch, N, d 
     
