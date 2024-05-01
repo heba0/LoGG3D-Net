@@ -23,14 +23,13 @@ class LOGG3D(nn.Module):
 
     def forward(self, x):
         _, counts = torch.unique(x.C[:, -1], return_counts=True)
-
         x = self.spvcnn(x)
         y = torch.split(x, list(counts))
         
-        weights_y = self_attention(y)
-        y = y * weights_y
+        x = torch.nn.utils.rnn.pad_sequence(list(y)).permute(1, 0, 2)
         
-        x = torch.nn.utils.rnn.pad_sequence(list(weighted_y)).permute(1, 0, 2)
+        weights = self_attention(x)
+        x[0] = x[0] * weights
         x = self.sop(x)
         return x, y[:2] # slice to 2 is to keep only anchor and positive pair, ignore negative sample and others
 
@@ -42,6 +41,7 @@ if __name__ == '__main__':
     lidar_pc = np.fromfile(_backbone_model_dir +
                            '/tutorial_data/000000.bin', dtype=np.float32)
     lidar_pc = lidar_pc.reshape(-1, 4)
+    print('==== lidar_pc: ', lidar_pc.shape)
     input = make_sparse_tensor(lidar_pc, 0.05).cuda()
 
     model = LOGG3D().cuda()
