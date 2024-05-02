@@ -8,6 +8,8 @@ import pickle
 from typing import List, Dict
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+
 from utils.o3d_tools import *
 from utils.data_loaders.pointcloud_dataset import *
 

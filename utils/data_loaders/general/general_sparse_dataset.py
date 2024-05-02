@@ -30,7 +30,7 @@ class GeneralSparseTupleDataset(GeneralTupleDataset):
         self.voxel_size = config.voxel_size
         self.num_points = config.num_points
         self.phase = phase
-        self.downsample = config.downsample
+        # self.downsample = config.downsample
         self.gp_rem = config.gp_rem
         self.gp_vals = config.gp_vals
         self.int_norm = config.mulran_normalize_intensity
@@ -148,7 +148,7 @@ class GeneralPointSparseTupleDataset(GeneralSparseTupleDataset):
         self.voxel_size = config.voxel_size
         self.num_points = config.num_points
         self.phase = phase
-        self.downsample = config.downsample
+        # self.downsample = config.downsample
         self.gp_rem = config.gp_rem
         self.gp_vals = config.gp_vals
         self.int_norm = config.mulran_normalize_intensity
