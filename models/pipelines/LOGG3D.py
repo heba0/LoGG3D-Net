@@ -28,7 +28,7 @@ class LOGG3D(nn.Module):
         
         x = torch.nn.utils.rnn.pad_sequence(list(y)).permute(1, 0, 2)
         
-        weights = self_attention(x)
+        weights = self_attention(y)
         x[0] = x[0] * weights
         x = self.sop(x)
         return x, y[:2] # slice to 2 is to keep only anchor and positive pair, ignore negative sample and others
