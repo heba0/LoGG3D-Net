@@ -37,7 +37,7 @@ class GeneralSparseTupleDataset(GeneralTupleDataset):
 
     def get_pointcloud_sparse_tensor(self,  base_dir, rel_path, dataset, get_pcd=False):
         fname = os.path.join(base_dir, rel_path)
-        if dataset == 'ugv' or dataset == 'apollo' or dataset == 'bushwalk' or dataset == 'wildplaces'::
+        if dataset == 'ugv' or dataset == 'apollo' or dataset == 'bushwalk' or dataset == 'wildplaces':
             pcd = o3d.io.read_point_cloud(fname) # TODO: add numpy load, conditional
             
         if dataset == 'mulran' or dataset == 'kitti':
@@ -182,17 +182,49 @@ class GeneralPointSparseTupleDataset(GeneralSparseTupleDataset):
         p1_T_w = np.linalg.inv(w_T_p1)
         p1_T_p2 = np.matmul(p1_T_w, w_T_p2)
         return p1_T_p2
+    
+
+    def quaternion_to_rotation_matrix(self, qx, qy, qz, qw):
+        # Normalize quaternion
+        norm = np.sqrt(qx*qx + qy*qy + qz*qz + qw*qw)
+        qx /= norm
+        qy /= norm
+        qz /= norm
+        qw /= norm
+        
+        # Rotation matrix
+        rotation_matrix = np.array([
+            [1 - 2*qy*qy - 2*qz*qz, 2*qx*qy - 2*qz*qw, 2*qx*qz + 2*qy*qw],
+            [2*qx*qy + 2*qz*qw, 1 - 2*qx*qx - 2*qz*qz, 2*qy*qz - 2*qx*qw],
+            [2*qx*qz - 2*qy*qw, 2*qy*qz + 2*qx*qw, 1 - 2*qx*qx - 2*qy*qy]
+        ])
+        
+        return rotation_matrix
+
+    def pose_to_matrix(self, x, y, z, qx, qy, qz, qw):
+        rotation_matrix = self.quaternion_to_rotation_matrix(qx, qy, qz, qw)
+        translation_vector = np.array([[x], [y], [z]])
+        
+        # Assemble transformation matrix
+        transformation_matrix = np.identity(4)
+        transformation_matrix[:3, :3] = rotation_matrix
+        transformation_matrix[:3, 3] = translation_vector.flatten()
+        
+        return transformation_matrix
 
     def get_point_tuples(self, drive_id, query_id, pos_id):
         drive_path = self.base_dirs[drive_id]
         query_data = self.files[query_id]
+        query_data_pose =  self.pose_to_matrix(*query_data.pose)
         pos_data = self.files[pos_id]
+        pos_data_pose =  self.pose_to_matrix(*pos_data.pose)
+
         q_st, q_pcd = self.get_pointcloud_sparse_tensor(drive_path, query_data.rel_scan_filepath, query_data.dataset, get_pcd=True)
         p_st, p_pcd = self.get_pointcloud_sparse_tensor(drive_path, pos_data.rel_scan_filepath, pos_data.dataset, get_pcd=True)
 
         matching_search_voxel_size = min(self.voxel_size*1.5, 0.1)
         # all_odometry = self.get_gt_transforms(drive_id, [query_id, pos_id])
-        all_odometry = [query_data.pose, pos_data.pose]
+        all_odometry = [query_data_pose, pos_data_pose]
         delta_T = self.get_delta_pose(drive_id, all_odometry)
         p_pcd.transform(delta_T)
         # draw_registration_result(q_pcd, p_pcd)

@@ -25,10 +25,9 @@ def self_attention(local_feat):
         norm_local_feat = nn.functional.normalize(local_feat_c, p=2, dim=-1)
         anchor_pc = norm_local_feat[0]
         self_sim_score = torch.zeros(num_feat).to(anchor_pc.device)
-
+    
         for i in range(batch_size):
             target_pc = norm_local_feat[i]
-            
             self_sim_matrix = torch.matmul(anchor_pc, target_pc.T) # output dim: N x N
             
             self_sim_sub    = self_sim_matrix.mean(-1)
