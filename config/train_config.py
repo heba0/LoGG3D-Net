@@ -109,7 +109,7 @@ data_arg.add_argument('--wildplaces_dir', type=str,
 # Data loader configs
 data_arg.add_argument('--train_phase', type=str, default="train")
 data_arg.add_argument('--train_pickles', type=dict, default={
-    'wildplaces': "/data/training_wild-places.pickle",
+    'wildplaces': "/cluster/scratch/haozhu1/training_wild-places.pickle",
 })
 data_arg.add_argument('--gp_vals', type=dict, default={
     'apollo': 1.6, 'kitti':1.5, 'mulran':0.9, 'wildplaces':0.9
