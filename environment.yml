@@ -1,0 +1,22 @@
+name: logg3d_env
+
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+  - anaconda
+
+dependencies:
+  - python=3.9.19
+  - mpi4py
+  - openmpi
+  # - pytorch=2.2.0
+  # - torchvision=0.17.0
+  # - torchaudio=2.2.0
+  # - torchsparse
+  # - libsparsehash-dev
+  - pip
+  - pip:
+    - open3d
+    - -r requirements.txt
+
