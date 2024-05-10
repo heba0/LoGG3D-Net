@@ -17,8 +17,8 @@ def str2bool(v):
 # Training
 trainer_arg = add_argument_group('Train')
 trainer_arg.add_argument('--train_pipeline', type=str, default='LOGG3D')
-trainer_arg.add_argument('--resume_training', type=str2bool, default=False)
-trainer_arg.add_argument('--resume_checkpoint', type=str, default='')
+trainer_arg.add_argument('--resume_training', type=str2bool, default=True)
+trainer_arg.add_argument('--resume_checkpoint', type=str, default='/cluster/scratch/haozhu1/checkpoints/kitti_10cm_loo/2021-09-14_03-43-02_3n24h_Kitti_v10_q29_10s0_262447.pth')
 
 # Batch setting
 trainer_arg.add_argument('--batch_size', type=int, default=1) # Batch size is limited to 1.
@@ -57,7 +57,7 @@ opt_arg.add_argument('--scheduler', type=str,
 data_arg = add_argument_group('Data')
 # KittiPointSparseTupleDataset #MulRanPointSparseTupleDataset
 data_arg.add_argument('--dataset', type=str,
-                      default='KittiPointSparseTupleDataset')
+                      default='GeneralPointSparseTupleDataset')
 data_arg.add_argument('--collation_type', type=str,
                       default='default')  # default#sparcify_list
 data_arg.add_argument('--num_points', type=int, default=35000)
@@ -103,7 +103,7 @@ data_arg.add_argument('--mulran_data_split', type=dict, default={
 })
 
 data_arg.add_argument('--wildplaces_dir', type=str,
-                      default='data/', help="Path to the wild-Places dataset")
+                      default='/cluster/scratch/haozhu1/56372v003/data/', help="Path to the wild-Places dataset")
 
 
 # Data loader configs
