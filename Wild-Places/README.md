@@ -16,63 +16,20 @@ If you find this dataset helpful for your research, please cite our paper using 
 }
 ```
 
-## Contents
-1. [Updates](#1-updates)
-2. [Download Instructions](#2-download-instructions)
-3. [Scripts](#3-scripts)
-    * [Environment](#31-environment)
-    * [Loading Point Clouds](#32-loading-point-clouds)
-    * [Generating Training & Testing Splits](#32-generating-training--testing-splits)
-        * [Training](#training)
-        * [Testing](#testing)
-    * [Evaluation](#33-evaluation)
-        * [Inter-Run](#inter-run-evaluation)
-        * [Intra-Run](#intra-run-evaluation)
-4. [Thanks](#4-thanks)
-
-## 1. Updates 
-- **21/10/2022** Wild-Places v1.0 Uploaded
-- **17/01/2023** Wild-Places is accepted to ICRA2023!
-- **20/01/2023** Wild-Places v2.0 Uploaded.  This update to the dataset integrates GPS into the SLAM solution to alleviate vertical drift in the larger loops of the traversal in both environments. NOTE: Sequence K-04 is currently unavailable for v2.0 due to a failed loop closure in the ground truth.  We are currently working on remedying this, and will release the sequence as soon this issue is rectified.
-
-## 2. Download Instructions
-
-Our dataset can be downloaded through [The CSIRO Data Access Portal](https://data.csiro.au/collection/csiro:56372?q=wild-places&_st=keyword&_str=1&_si=1). Detailed instructions for downloading the dataset can be found in the README file provided on the data access portal page. 
-
-## 3. Scripts
-
-### 3.1 Environment
-To create a python environment to use the scripts in this repository run the following command:
-```
-conda env create -f scripts/Wild-Places.yaml -n Wild-Places
-```
-
-### 3.2 Loading Point Clouds
-
-
-A code snippet to load a pointcloud file from our dataset can be found in `eval/load_pointcloud.py`
-
-### 3.2 Generating Training & Testing Splits
-
-In this repository we provide several scripts for partitioning our dataset into splits for training and evaluation.  
-The output of these scripts are pickle files containing training and evaluation splits in a format compatible with existing repositories such as [PointNetVLAD](https://github.com/mikacuy/pointnetvlad), [MinkLoc3D](https://github.com/jac99/MinkLoc3D)([v2](https://github.com/jac99/MinkLoc3Dv2)), [TransLoc3D](https://github.com/slothfulxtx/TransLoc3D) and [PPT](https://github.com/fpthink/PPT-Net).
-#### __Training__
-To generate the training splits run the following command:
-```
-python scripts/generate_splits/training_sets.py --dataset_root $_PATH_TO_DATASET --save_folder --$_SAVE_FOLDER_PATH
-```
-Where `$_PATH_TO_DATASET` is the path to the downloaded dataset, and `$_SAVE_FOLDER_PATH` is the path to the directory where the generated files will be saved.
-
-#### __Testing__
-
-To generate the testing splits run the following command:
-```
-python scripts/generate_splits/testing_sets.py --dataset_root $_PATH_TO_DATASET --save_folder --$_SAVE_FOLDER_PATH
-```
-This script will generate seperate testing pickles for the inter-run and intra-run evaluation modes on each environment.  The inter-run pickles will produce query and database files for each testing environment, while the intra-run pickles will produce a seperate training pickle for each individual point cloud sequence.
-
-### 3.3 Evaluation
+### Evaluation
 We provide evaluation scripts for both inter and intra-run evaluation on our dataset.
+
+#### __Updated Intra-run Evaluation__
+Example to run the Intra-run evaluation
+```
+python scripts/eval/intra-sequence_topK.py  \
+      --databases /cluster/scratch/haozhu1/Testing/V-04.pickle \
+      --database_features None --pcd_path /cluster/scratch/haozhu1/56372v003/data/ \
+      --logg3d_cpt LoGG3D-Net/training/checkpoints/LoGG3D-Net.pth \
+      --logg3d_outdim 32 \
+      --run_names V03_logg3d \
+      --save_dir Wild-Places/result 
+```
 
 #### __Inter-run Evaluation__
 
