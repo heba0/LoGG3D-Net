@@ -15,3 +15,4 @@ models/pipelines/.ipynb_checkpoints/
 .ipynb_checkpoints/
 evaluation/pr_curves/
 checking.py
+Wild-Places/result/
