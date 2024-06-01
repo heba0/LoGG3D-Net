@@ -95,6 +95,15 @@ def pdist(A, B, dist_type='L2'):
     else:
         raise NotImplementedError('Not implemented')
 
+
+def euclidean_dist(query, database):
+    return torch.cdist(torch.tensor(query).unsqueeze(0).unsqueeze(0), torch.tensor(database).unsqueeze(0)).squeeze().numpy()
+
+def cosine_dist(query, database):
+    return np.array(1 - torch.einsum('D,ND->N', torch.tensor(query), torch.tensor(database)))
+
+
+
 #####################################################################################
 # Timing
 

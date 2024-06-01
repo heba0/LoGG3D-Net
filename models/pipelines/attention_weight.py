@@ -40,16 +40,17 @@ def self_attention(local_feat):
     ## OPTION 1
     # "idf" score
     # self_sim_weight = torch.log(self_sim_score.shape[0] / (self_sim_score + 0.1))
+    self_sim_weight = torch.exp(-self_sim_score)
     # norm_sim_score = nn.functional.normalize(self_sim_score.unsqueeze(0), p=2)
     # self_sim_softmax = softmax(norm_sim_score).squeeze(0)
     # self_sim_weight = torch.log(1 / (self_sim_softmax + 0.1))
-    # print('****** self_sim_weight: ', self_sim_weight)
+    # print('****** self_sim_weight: ', self_sim_weight)2024-05-18_07-24-09_stand_att_1_0.pth
     
     ## OPTION 2
     # standardization, scale it to zero mean and unit standard deviation
-    self_sim_score_stand = (self_sim_score - torch.mean(self_sim_score)) / torch.std(self_sim_score)
+#     self_sim_score_stand = (self_sim_score - torch.mean(self_sim_score)) / torch.std(self_sim_score)
 
-    self_sim_weight = torch.exp(-self_sim_score_stand)      
+#     self_sim_weight = torch.exp(-self_sim_score_stand)      
 
     ## OPTION 3
     # normalize + softmax

@@ -17,7 +17,7 @@ from utils.data_loaders.general.general_dataset import *
 from utils.data_loaders.general.general_sparse_dataset import *
 
 ALL_DATASETS = [
-    GeneralDataset, GeneralTupleDataset, GeneralSparseTupleDataset, GeneralPointSparseTupleDataset
+    GeneralDataset, GeneralDatasetEval, WildPlacesDatasetEval, GeneralTupleDataset, GeneralSparseTupleDataset, GeneralPointSparseTupleDataset
 ]
 dataset_str_mapping = {d.__name__: d for d in ALL_DATASETS}
 

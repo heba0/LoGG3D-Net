@@ -44,6 +44,15 @@ class GeneralTrainingTuple:
         self.non_negatives = np.asarray([ p + id_offset for p in training_tuple.non_negatives])
         self.pose = training_tuple.pose
         # self.positives_poses = training_tuple.positives_poses
+        
+        
+class WildPlacesEvalTuple:
+    # Tuple describing an element for training/validation
+    def __init__(self, dataset: str, rel_scan_filepath : str, pose: None, timestamp : float):
+        self.dataset = dataset
+        self.rel_scan_filepath = rel_scan_filepath
+        self.timestamp = timestamp
+        self.pose = pose
 
 class GeneralDatasetEval(PointCloudDataset):
     r"""
@@ -72,13 +81,12 @@ class GeneralDatasetEval(PointCloudDataset):
             self, phase, random_rotation, random_occlusion, random_scale, config)
 
         logging.info("Initializing GeneralDataset")
-        # for pickle_dataset, pickle_path in self.eval_pickle.items():
-        pickle_dataset = 'bushwalk'
-        logging.info(f"Loading the pickles for {pickle_dataset} from {self.eval_pickle}")
-        tuple_set = pickle.load(open(self.eval_pickle, 'rb'))
-        for train_tuple in tuple_set:
-            tuple = GeneralTrainingTuple(dataset = pickle_dataset, training_tuple=tuple_set[train_tuple])
-            self.files.append(tuple)
+        for pickle_dataset, pickle_path in self.eval_pickle.items():
+            logging.info(f"Loading the pickles for {pickle_dataset} from {pickle_path}")
+            tuple_set = pickle.load(open(pickle_path, 'rb'))
+            for train_tuple in tuple_set:
+                tuple = GeneralTrainingTuple(dataset = pickle_dataset, training_tuple=tuple_set[train_tuple])
+                self.files.append(tuple)
 
 
     def get_pointcloud_tensor(self, base_dir, rel_path, dataset):
@@ -99,6 +107,59 @@ class GeneralDatasetEval(PointCloudDataset):
 
         return (xyz0_th,
                 meta_info)
+    
+class WildPlacesDatasetEval(PointCloudDataset):
+    r"""
+    Generate single pointcloud frame from General dataset. 
+    """
+
+    def __init__(self,
+                 phase,
+                 random_rotation=False,
+                 random_occlusion=False,
+                 random_scale=False,
+                 config=None):
+        
+        self.base_dirs = {"wildplaces" : config.wildplaces_dir}
+
+        self.eval_pickle = config.eval_pickle
+        self.pnv_prep = config.pnv_preprocessing
+        self.gp_rem = config.gp_rem
+        self.voxel_size = config.voxel_size
+
+        PointCloudDataset.__init__(
+            self, phase, random_rotation, random_occlusion, random_scale, config)
+
+        logging.info("Initializing WildPlacesDatasetEval")
+        for pickle_dataset, pickle_path in self.eval_pickle.items():
+            logging.info(f"Loading the pickles for {pickle_dataset} from {pickle_path}")
+            tuple_set = pickle.load(open(pickle_path, 'rb'))
+            for train_tuple in tuple_set:
+                pickle_dict = tuple_set[train_tuple]
+                wp_tuple = WildPlacesEvalTuple(dataset = pickle_dataset, rel_scan_filepath=pickle_dict['query'], pose=pickle_dict['pose'], timestamp=pickle_dict['timestamp'])
+                # tuple = GeneralTrainingTuple(dataset = pickle_dataset, training_tuple=tuple_set[train_tuple])
+                self.files.append(wp_tuple)
+
+
+    def get_pointcloud_tensor(self, base_dir, rel_path, dataset):
+        fname = os.path.join(base_dir, rel_path)
+        pcd = o3d.io.read_point_cloud(fname) # TODO: add numpy load, conditional
+        downpcd = pcd.voxel_down_sample(voxel_size=self.voxel_size)
+        xyz = np.asarray(downpcd.points)
+        oo = np.ones(len(xyz)).reshape((-1,1))
+        xyzr = np.hstack((xyz, oo)).astype(np.float32)
+
+        return xyzr
+
+    def __getitem__(self, idx):
+        anchor_data = self.files[idx]
+        
+        xyz0_th = self.get_pointcloud_tensor(self.base_dirs[anchor_data.dataset], anchor_data.rel_scan_filepath, anchor_data.dataset)
+        meta_info = {'drive': anchor_data.dataset, 't': anchor_data.timestamp}
+
+        return (xyz0_th,
+                meta_info)
+    
 class GeneralDataset(PointCloudDataset):
     r"""
     Generate single pointcloud frame from General dataset. 

@@ -17,9 +17,12 @@ def str2bool(v):
 # Evaluation
 eval_arg = add_argument_group('Eval')
 eval_arg.add_argument('--eval_pipeline', type=str, default='LOGG3D')
+eval_arg.add_argument('--eval_type', type=str, default='stand_att', help="use for saving PR plot")
 eval_arg.add_argument('--kitti_eval_seq', type=int, default=8)
 eval_arg.add_argument('--mulran_eval_seq', type=str,
                       default='Riverside/Riverside_02')
+eval_arg.add_argument('--wildplaces_eval_seq', type=str,
+                      default='Venman/V-04') # Karawatha/K-04
 eval_arg.add_argument('--checkpoint_name', type=str,
                       default='/kitti_10cm_loo/2021-09-14_20-28-22_3n24h_Kitti_v10_q29_10s8_263169.pth')
 eval_arg.add_argument('--eval_batch_size', type=int, default=1)
@@ -45,7 +48,7 @@ eval_arg.add_argument("--num_thresholds", default=1000, type=int,
 # Dataset specific configurations
 data_arg = add_argument_group('Data')
 # KittiDataset #MulRanDataset
-data_arg.add_argument('--eval_dataset', type=str, default='KittiDataset')
+data_arg.add_argument('--eval_dataset', type=str, default='WildPlacesDatasetEval')
 data_arg.add_argument('--collation_type', type=str,
                       default='default')  # default#sparcify_list
 data_arg.add_argument("--eval_save_descriptors", type=str2bool, default=False)
@@ -67,6 +70,10 @@ data_arg.add_argument('--kitti_data_split', type=dict, default={
     'val': [],
     'test': [0]
 })
+data_arg.add_argument('--wildplaces_dir', type=str,
+                      default='/cluster/scratch/haozhu1/56372v003/data/', help="Path to the wild-Places dataset")
+
+
 
 data_arg.add_argument('--mulran_dir', type=str,
                       default='/mnt/088A6CBB8A6CA742/Datasets/MulRan/', help="Path to the MulRan dataset")
@@ -80,6 +87,9 @@ data_arg.add_argument('--mulran_data_split', type=dict, default={
 })
 
 # Data loader configs
+data_arg.add_argument('--eval_pickle', type=dict, default={
+    'wildplaces': "/cluster/scratch/haozhu1/Testing/V-04.pickle",
+})
 data_arg.add_argument('--train_phase', type=str, default="train")
 data_arg.add_argument('--val_phase', type=str, default="val")
 data_arg.add_argument('--test_phase', type=str, default="test")

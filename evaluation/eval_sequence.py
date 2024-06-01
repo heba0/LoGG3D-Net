@@ -8,10 +8,12 @@ import numpy as np
 import math
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 from models.pipelines.pipeline_utils import *
-from utils.data_loaders.make_dataloader import *
+# from utils.data_loaders.make_dataloader import *
+from utils.data_loaders.make_dataloader_general import *
 from utils.misc_utils import *
 from utils.data_loaders.mulran.mulran_dataset import load_poses_from_csv, load_timestamps_csv
 from utils.data_loaders.kitti.kitti_dataset import load_poses_from_txt, load_timestamps
+from utils.data_utils.wild_places_utils import wp_load_poses_from_csv, wp_load_timestamps_csv
 
 __all__ = ['evaluate_sequence_reg']
 
@@ -54,6 +56,13 @@ def evaluate_sequence_reg(model, cfg):
         revisit_json = json.load(
             open(revisit_json_dir + revisit_json_file, "r"))
         is_revisit_list = revisit_json[eval_seq]
+    elif 'WildPlaces' in cfg.eval_dataset:
+        eval_seq = cfg.wildplaces_eval_seq
+        sequence_path = cfg.wildplaces_dir + eval_seq
+        positions_database = wp_load_poses_from_csv(sequence_path + '/poses_aligned.csv')
+        timestamps = wp_load_timestamps_csv(sequence_path + '/poses_aligned.csv')
+        
+    
 
     logging.info(f'Evaluating sequence {eval_seq} at {sequence_path}')
     thresholds = np.linspace(
@@ -89,7 +98,6 @@ def evaluate_sequence_reg(model, cfg):
     start_time = timestamps[0]
 
     for query_idx in range(num_queries):
-
         input_data = next(iterator)
         prep_timer.tic()
         lidar_pc = input_data[0][0]  # .cpu().detach().numpy()
@@ -144,9 +152,21 @@ def evaluate_sequence_reg(model, cfg):
 
         place_candidate = seen_poses[nearest_idx]
         p_dist = np.linalg.norm(query_pose - place_candidate)
+        
+        """
+        dist_seen_embedding = cosine_dist(query_pose, db_seen_poses)
+        dist_seen_world = euclidean_dist(q_coord, seen_coords)
 
-        # is_revisit = check_if_revisit(query_pose, db_seen_poses, cfg.revisit_criteria)
-        is_revisit = is_revisit_list[query_idx]
+        # Check if re-visit 
+        if np.any(dist_seen_world < args.world_thresh):
+            revisit = True 
+            num_revisits += 1 
+        else:
+            revisit = False 
+        """
+
+        is_revisit = check_if_revisit(query_pose, db_seen_poses, cfg.revisit_criteria)
+        # is_revisit = is_revisit_list[query_idx]
         is_correct_loc = 0
         if is_revisit:
             num_revisits += 1
@@ -231,7 +251,7 @@ def evaluate_sequence_reg(model, cfg):
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
             eval_seq = str(eval_seq).split('/')[-1]
-            plt.savefig(save_dir + '/' + eval_seq + '.png')
+            plt.savefig(save_dir + '/' + eval_seq + '_' + cfg.eval_type + '_' + '.png')
 
     if not save_descriptors:
         logging.info('Average times per scan:')

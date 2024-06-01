@@ -5,6 +5,7 @@ import logging
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 from utils.misc_utils import log_config
 from evaluation.eval_sequence import *
+from evaluation.eval_sequence_topK import evaluate_sequence_topK
 
 ch = logging.StreamHandler(sys.stdout)
 logging.getLogger().setLevel(logging.INFO)
@@ -35,8 +36,7 @@ if __name__ == "__main__":
 
     # Get model
     model = get_pipeline(cfg.eval_pipeline)
-
-    save_path = os.path.join(os.path.dirname(__file__), '../', 'checkpoints')
+    save_path = os.path.join(os.path.dirname(__file__), '../')
     save_path = str(save_path) + cfg.checkpoint_name
     print('Loading checkpoint from: ', save_path)
     logging.info('\n' + ' '.join([sys.executable] + sys.argv))

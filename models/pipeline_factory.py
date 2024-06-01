@@ -5,9 +5,9 @@ from pipelines.PointNetVLAD import *
 from pipelines.LOGG3D import *
 
 
-def get_pipeline(pipeline_name):
+def get_pipeline(pipeline_name, logg3d_dim=16):
     if pipeline_name == 'LOGG3D':
-        pipeline = LOGG3D(feature_dim=16)
+        pipeline = LOGG3D(feature_dim=logg3d_dim)
     elif pipeline_name == 'PointNetVLAD':
         pipeline = PointNetVLAD(global_feat=True, feature_transform=True,
                                 max_pool=False, output_dim=256, num_points=4096)

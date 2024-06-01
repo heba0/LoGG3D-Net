@@ -37,6 +37,7 @@ def main():
         logging.info('\n' + ' '.join([sys.executable] + sys.argv))
         logging.info('Slurm Job ID: ' + cfg.job_id)
         logging.info('Training pipeline: ' + cfg.train_pipeline)
+        logging.info('torch.version.cuda: ' + torch.version.cuda)
         log_config(cfg, logging)
         cfg.experiment_name = f"{datetime.now(tz=None).strftime('%Y-%m-%d_%H-%M-%S')}_{cfg.experiment_name}_{cfg.job_id}"
         logging.info("Experiment Name: " + cfg.experiment_name)
@@ -63,6 +64,7 @@ def main():
         print("Resuming Model From ", save_path)
         checkpoint = torch.load(save_path)
         starting_epoch = checkpoint['epoch']
+        print("*** starting_epoch: ", starting_epoch)
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     else:
@@ -100,6 +102,7 @@ def main():
                 scene_loss = loss_function(output[0], cfg)
                 running_scene_loss += scene_loss.item()
                 if cfg.point_loss_weight > 0:
+                    print('batch pos pairs: ', batch[1]['pos_pairs'], len(batch[1]['pos_pairs']))
                     point_loss = point_loss_function(
                         output[1][0], output[1][1], batch[1]['pos_pairs'], cfg)
                     running_point_loss += point_loss.item()
@@ -147,7 +150,7 @@ def main():
             save_path = os.path.join(os.path.dirname(__file__), 'checkpoints')
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
-            save_path = str(save_path) + '/' + cfg.experiment_name
+            save_path = str(save_path) + '/' + cfg.experiment_name + '.pth'
             logging.info("Saving to: " + str(save_path))
             if isinstance(model, torch.nn.DataParallel):
                 model_to_save = model.module
