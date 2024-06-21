@@ -31,7 +31,7 @@ def main():
     torch.cuda.set_device(dist.local_rank())
 
     if (dist.rank() % dist.size() == 0):
-        writer = SummaryWriter(comment=f"_{cfg.job_id}")
+        writer = SummaryWriter(cfg.out_dir, comment=f"_{cfg.job_id}")
 
         logger = logging.getLogger()
         logging.info('\n' + ' '.join([sys.executable] + sys.argv))
@@ -46,7 +46,7 @@ def main():
         logging.info('dist rank: ' + str(dist.rank()))
 
     # Get model
-    model = get_pipeline(cfg.train_pipeline)
+    model = get_pipeline(cfg.train_pipeline, logg3d_dim=32)
     n_params = sum([param.nelement() for param in model.parameters()])
     logging.info('Number of model parameters: {}'.format(n_params))
 
@@ -54,6 +54,7 @@ def main():
     # parameters = filter(lambda p: p.requires_grad, model.parameters())
     loss_function = train_utils.get_loss_function(cfg)
     point_loss_function = train_utils.get_point_loss_function(cfg)
+    attention_loss_function = train_utils.get_attention_loss_function(cfg)
     optimizer = train_utils.get_optimizer(cfg, model.parameters())
     scheduler = train_utils.get_scheduler(cfg, optimizer)
 
@@ -65,8 +66,9 @@ def main():
         checkpoint = torch.load(save_path)
         starting_epoch = checkpoint['epoch']
         print("*** starting_epoch: ", starting_epoch)
-        model.load_state_dict(checkpoint['model_state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        model.load_state_dict(checkpoint['model_state_dict'], strict= False)
+        # optimizer = torch.optim.Adam(model.parameters(), cfg.base_learning_rate)  
+        # optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     else:
         starting_epoch = 0
 
@@ -91,6 +93,7 @@ def main():
         running_loss = 0.0
         running_scene_loss = 0.0
         running_point_loss = 0.0
+        running_atten_loss = 0.0
         model.train()
 
         for i, batch in enumerate(train_loader, 0):
@@ -102,13 +105,18 @@ def main():
                 scene_loss = loss_function(output[0], cfg)
                 running_scene_loss += scene_loss.item()
                 if cfg.point_loss_weight > 0:
-                    print('batch pos pairs: ', batch[1]['pos_pairs'], len(batch[1]['pos_pairs']))
+                    # print('batch pos pairs: ', batch[1]['pos_pairs'], len(batch[1]['pos_pairs']))
                     point_loss = point_loss_function(
                         output[1][0], output[1][1], batch[1]['pos_pairs'], cfg)
                     running_point_loss += point_loss.item()
                     loss = cfg.scene_loss_weight * scene_loss + cfg.point_loss_weight * point_loss
                 else:
                     loss = scene_loss
+
+                if cfg.attention_loss_weight > 0:
+                    atten_loss = attention_loss_function(output[1], output[2])
+                    running_atten_loss += atten_loss.item()
+                    loss += cfg.attention_loss_weight * atten_loss
 
             elif cfg.train_pipeline == 'PointNetVLAD':
                 batch_t = batch.to('cuda:%d' % dist.local_rank())
@@ -126,13 +134,15 @@ def main():
                 avg_loss = running_loss / cfg.loss_log_step
                 avg_scene_loss = running_scene_loss / cfg.loss_log_step
                 avg_point_loss = running_point_loss / cfg.loss_log_step
+                avg_atten_loss = running_atten_loss / cfg.loss_log_step
 
                 if (dist.rank() % dist.size() == 0):
                     lr = scheduler.get_last_lr()
                     logging.info('avg running loss: ' +
                                  str(avg_loss) + ' LR: %03f' % (lr[0]))
                     logging.info('avg_scene_loss: ' + str(avg_scene_loss) +
-                                 ' avg_point_loss: ' + str(avg_point_loss))
+                                 ' avg_point_loss: ' + str(avg_point_loss) +
+                                 ' avg_atten_loss: ' + str(avg_atten_loss))
                     writer.add_scalar('training loss',
                                       avg_loss,
                                       epoch * len(train_loader) + i)
@@ -142,7 +152,10 @@ def main():
                     writer.add_scalar('training scene loss',
                                       avg_scene_loss,
                                       epoch * len(train_loader) + i)
-                running_loss, running_scene_loss, running_point_loss = 0.0, 0.0, 0.0
+                    writer.add_scalar('training attention loss',
+                                      avg_atten_loss,
+                                      epoch * len(train_loader) + i)
+                running_loss, running_scene_loss, running_point_loss, running_atten_loss = 0.0, 0.0, 0.0, 0.0
 
         scheduler.step()
 

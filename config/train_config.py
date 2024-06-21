@@ -18,7 +18,7 @@ def str2bool(v):
 trainer_arg = add_argument_group('Train')
 trainer_arg.add_argument('--train_pipeline', type=str, default='LOGG3D')
 trainer_arg.add_argument('--resume_training', type=str2bool, default=True)
-trainer_arg.add_argument('--resume_checkpoint', type=str, default='/cluster/scratch/haozhu1/checkpoints/kitti_10cm_loo/2021-09-14_03-43-02_3n24h_Kitti_v10_q29_10s0_262447.pth')
+trainer_arg.add_argument('--resume_checkpoint', type=str, default='/cluster/work/riner/users/PLR-2024/haozhu1/LoGG3D-Net/training/checkpoints/LoGG3D-Net.pth')
 
 # Batch setting
 trainer_arg.add_argument('--batch_size', type=int, default=1) # Batch size is limited to 1.
@@ -43,6 +43,7 @@ trainer_arg.add_argument('--point_pos_margin', type=float, default=0.1)  # 0.1
 trainer_arg.add_argument('--point_neg_weight', type=float, default=1.0)
 trainer_arg.add_argument('--point_loss_weight', type=float, default=1.0)  # 0.1
 trainer_arg.add_argument('--scene_loss_weight', type=float, default=1.0)  # 0.1
+trainer_arg.add_argument('--attention_loss_weight', type=float, default=1.0)  # 0.1
 
 # Optimizer arguments
 opt_arg = add_argument_group('Optimizer')
